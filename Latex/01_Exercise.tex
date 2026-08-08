@@ -1,0 +1,816 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{array,booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+
+\newcommand{\ket}[1]{\left|#1\right\rangle}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+\lstset{style=pythonstyle}
+
+\title{\textbf{Exercise Set: Simple Quantum Circuits with Qiskit}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Instructions}
+This exercise set combines:
+\begin{itemize}
+    \item manual calculations of quantum states and gate operations,
+    \item understanding and prediction of Qiskit programs,
+    \item implementation of quantum gates and circuits using Qiskit,
+    \item comparison of theoretical and simulated results.
+\end{itemize}
+
+Students should perform manual derivations before running the corresponding Qiskit programs wherever mentioned.
+
+\section{Qubits and State Vectors}
+
+\subsection*{Exercise 1: Basis states}
+Write the vector representation of the following states manually:
+\begin{enumerate}
+    \item $\ket{0}$
+    \item $\ket{1}$
+    \item $\ket{00}$
+    \item $\ket{01}$
+    \item $\ket{10}$
+    \item $\ket{11}$
+\end{enumerate}
+
+Using the tensor product, prove that
+\[
+\ket{01}=\ket{0}\otimes\ket{1}=\begin{pmatrix}0\\1\\0\\0\end{pmatrix}.
+\]
+
+\subsection*{Exercise 2: Normalization of a qubit}
+Determine whether each state is a valid normalized qubit state.
+
+\begin{enumerate}[label=(\alph*)]
+    \item
+    \[
+    \ket{\psi}=
+    \frac{1}{\sqrt{2}}\ket{0}+
+    \frac{1}{\sqrt{2}}\ket{1}
+    \]
+    \item
+    \[
+    \ket{\psi}=
+    \frac{1}{2}\ket{0}+
+    \frac{\sqrt{3}}{2}\ket{1}
+    \]
+    \item
+    \[
+    \ket{\psi}=
+    \frac{1}{2}\ket{0}+
+    \frac{1}{2}\ket{1}
+    \]
+\end{enumerate}
+
+Use
+\[
+|c_0|^2+|c_1|^2=1
+\]
+to justify your answer.
+
+Then write Python code that verifies normalization numerically.
+
+\subsection*{Exercise 3: Construct a state from $\theta$ and $\phi$}
+Given
+\[
+\ket{\psi}=
+\cos\left(\frac{\theta}{2}\right)\ket{0}
++
+e^{i\phi}\sin\left(\frac{\theta}{2}\right)\ket{1},
+\]
+calculate the state manually for:
+\begin{enumerate}
+    \item $\theta=0,\ \phi=0$
+    \item $\theta=\pi,\ \phi=0$
+    \item $\theta=\frac{\pi}{2},\ \phi=0$
+    \item $\theta=\frac{\pi}{2},\ \phi=\pi$
+\end{enumerate}
+
+Then implement:
+\begin{lstlisting}
+def state(theta, phi):
+    ...
+\end{lstlisting}
+
+The function should return the two amplitudes.
+
+\subsection*{Exercise 4: Measurement probabilities}
+For
+\[
+\ket{\psi}=
+\frac{\sqrt{3}}{2}\ket{0}
++
+\frac{1}{2}\ket{1},
+\]
+calculate manually:
+\[
+P(0)
+\qquad\text{and}\qquad
+P(1).
+\]
+
+Then prepare the state in Qiskit and simulate 1000 measurements. Compare the experimental frequencies with the theoretical probabilities.
+
+\section{Single-Qubit Gates}
+
+\subsection*{Exercise 5: Pauli-X gate}
+Given
+\[
+X=
+\begin{bmatrix}
+0&1\\
+1&0
+\end{bmatrix},
+\]
+calculate manually:
+\[
+X\ket{0}
+\qquad\text{and}\qquad
+X\ket{1}.
+\]
+
+Then implement both cases using Qiskit.
+
+Complete:
+\begin{lstlisting}
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector
+
+qc = QuantumCircuit(1)
+
+# Add the required gate
+
+state = Statevector.from_instruction(qc)
+print(state)
+\end{lstlisting}
+
+\subsection*{Exercise 6: Two consecutive X gates}
+Without running Qiskit first, predict the final state of
+\[
+X(X\ket{0}).
+\]
+
+Then verify using:
+\begin{lstlisting}
+qc.x(0)
+qc.x(0)
+\end{lstlisting}
+
+Explain why
+\[
+X^2=I.
+\]
+
+\subsection*{Exercise 7: Hadamard gate}
+Given
+\[
+H=
+\frac{1}{\sqrt{2}}
+\begin{bmatrix}
+1&1\\
+1&-1
+\end{bmatrix},
+\]
+calculate manually:
+\[
+H\ket{0}
+\qquad\text{and}\qquad
+H\ket{1}.
+\]
+
+Then reproduce both cases in Qiskit and display the statevector.
+
+\subsection*{Exercise 8: Two Hadamard gates}
+Calculate manually:
+\[
+H(H\ket{0}).
+\]
+
+Then create a Qiskit circuit containing two consecutive Hadamard gates:
+\[
+\ket{0}\longrightarrow H\longrightarrow H.
+\]
+
+What is the final state? Show that
+\[
+H^2=I.
+\]
+
+\subsection*{Exercise 9: Pauli-Z gate}
+Calculate:
+\[
+Z\ket{0}
+\qquad\text{and}\qquad
+Z\ket{1}
+\]
+for
+\[
+Z=
+\begin{bmatrix}
+1&0\\
+0&-1
+\end{bmatrix}.
+\]
+
+Then determine manually what happens in the circuit
+\[
+\ket{0}\xrightarrow{H}\xrightarrow{Z}.
+\]
+
+Verify your result using Qiskit.
+
+\subsection*{Exercise 10: Phase versus measurement}
+Consider:
+\[
+\ket{\psi_1}=
+\frac{\ket{0}+\ket{1}}{\sqrt{2}}
+\]
+and
+\[
+\ket{\psi_2}=
+\frac{\ket{0}-\ket{1}}{\sqrt{2}}.
+\]
+
+Answer:
+\begin{enumerate}
+    \item What is $P(0)$ for each state?
+    \item What is $P(1)$ for each state?
+    \item Are the two states identical?
+    \item Why can computational-basis measurement not distinguish them directly?
+\end{enumerate}
+
+Create both states using Qiskit.
+
+\section{Understanding Qiskit Code}
+
+\subsection*{Exercise 11: Predict the output}
+Study the following code without running it first:
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+
+qc.x(0)
+qc.h(0)
+
+state = Statevector.from_instruction(qc)
+
+print(state)
+\end{lstlisting}
+
+Answer:
+\begin{enumerate}
+    \item What is the initial state?
+    \item What is the state after \texttt{x(0)}?
+    \item What is the final state after \texttt{h(0)}?
+    \item What statevector do you expect?
+\end{enumerate}
+
+Then run the code and verify your prediction.
+
+\subsection*{Exercise 12: Debug the circuit}
+The intention is to prepare
+\[
+\frac{\ket{0}+\ket{1}}{\sqrt{2}}.
+\]
+
+A student writes:
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+qc.x(0)
+
+state = Statevector.from_instruction(qc)
+\end{lstlisting}
+
+Identify the mistake and correct the code.
+
+\subsection*{Exercise 13: Understand circuit ordering}
+Consider:
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+
+qc.h(0)
+qc.z(0)
+qc.h(0)
+\end{lstlisting}
+
+First calculate the result manually. Then verify using Qiskit.
+
+What familiar gate is equivalent to
+\[
+HZH?
+\]
+
+\section{Multiple Qubits and Tensor Products}
+
+\subsection*{Exercise 14: Tensor-product calculation}
+Calculate manually:
+\[
+\ket{0}\otimes\ket{1}.
+\]
+
+Use
+\[
+\ket{0}=
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix},
+\qquad
+\ket{1}=
+\begin{bmatrix}
+0\\
+1
+\end{bmatrix}.
+\]
+
+Then verify using:
+\begin{lstlisting}
+np.kron()
+\end{lstlisting}
+
+\subsection*{Exercise 15: Product of superposition states}
+Calculate:
+\[
+\ket{+}\otimes\ket{+},
+\]
+where
+\[
+\ket{+}=
+\frac{\ket{0}+\ket{1}}{\sqrt{2}}.
+\]
+
+Express the result in the computational basis. Then implement a two-qubit Qiskit circuit that generates this state.
+
+\subsection*{Exercise 16: Three-qubit superposition}
+Start with
+\[
+\ket{000}.
+\]
+
+Apply a Hadamard gate to every qubit.
+
+Determine manually the final state. Then implement:
+\begin{lstlisting}
+qc = QuantumCircuit(3)
+\end{lstlisting}
+
+How many computational-basis states have nonzero amplitude? What is the amplitude of each?
+
+\section{Controlled Gates and Entanglement}
+
+\subsection*{Exercise 17: CNOT truth table}
+Construct the complete truth table for a CNOT gate. Assume the first qubit is the control and the second is the target.
+
+Determine:
+\[
+\ket{00}\rightarrow ?,
+\qquad
+\ket{01}\rightarrow ?,
+\qquad
+\ket{10}\rightarrow ?,
+\qquad
+\ket{11}\rightarrow ?.
+\]
+
+Then verify each case using Qiskit.
+
+\subsection*{Exercise 18: Create a Bell state}
+Starting from
+\[
+\ket{00},
+\]
+apply:
+\begin{enumerate}
+    \item $H$ to qubit 0.
+    \item CNOT with qubit 0 as control and qubit 1 as target.
+\end{enumerate}
+
+Calculate the state after each step. Show that the final state is
+\[
+\ket{\Phi^+}
+=
+\frac{\ket{00}+\ket{11}}{\sqrt{2}}.
+\]
+
+Implement the circuit in Qiskit and display both the circuit and the statevector.
+
+\subsection*{Exercise 19: Bell-state measurement}
+Modify the Bell-state circuit by adding measurements. Run it for:
+\begin{itemize}
+    \item 10 shots,
+    \item 100 shots,
+    \item 1000 shots,
+    \item 10,000 shots.
+\end{itemize}
+
+Record the number of occurrences of \texttt{00} and \texttt{11}. Explain why \texttt{01} and \texttt{10} should ideally not occur.
+
+\subsection*{Exercise 20: Generate another Bell state}
+Design a circuit that generates
+\[
+\ket{\Psi^+}
+=
+\frac{\ket{01}+\ket{10}}{\sqrt{2}}.
+\]
+
+Tasks:
+\begin{enumerate}
+    \item Determine which additional $X$ gate is required.
+    \item Draw the circuit manually.
+    \item Implement it in Qiskit.
+    \item Verify the statevector.
+    \item Measure the circuit.
+\end{enumerate}
+
+\section{SWAP and Toffoli Gates}
+
+\subsection*{Exercise 21: SWAP operation}
+Prepare the state
+\[
+\ket{01}.
+\]
+
+Apply a SWAP gate. Predict the resulting state.
+
+Then implement:
+\begin{lstlisting}
+qc.swap(0, 1)
+\end{lstlisting}
+
+Verify the result.
+
+\subsection*{Exercise 22: SWAP decomposition}
+A SWAP gate can be constructed using three CNOT gates:
+\begin{lstlisting}
+CNOT(q0,q1)
+CNOT(q1,q0)
+CNOT(q0,q1)
+\end{lstlisting}
+
+Test the circuit for:
+\[
+\ket{00},\quad \ket{01},\quad \ket{10},\quad \ket{11}.
+\]
+
+Compare the results with Qiskit's built-in:
+\begin{lstlisting}
+qc.swap(0, 1)
+\end{lstlisting}
+
+\subsection*{Exercise 23: Toffoli gate truth table}
+The Toffoli gate has two control qubits and one target qubit.
+
+Create its complete eight-row truth table for
+\[
+\ket{000}
+\]
+through
+\[
+\ket{111}.
+\]
+
+Identify the input combinations for which the target qubit changes.
+
+Then verify using:
+\begin{lstlisting}
+qc.ccx(0, 1, 2)
+\end{lstlisting}
+
+\section{Measurements}
+
+\subsection*{Exercise 24: Hadamard measurement}
+Construct:
+\begin{lstlisting}
+qc = QuantumCircuit(1, 1)
+
+qc.h(0)
+qc.measure(0, 0)
+\end{lstlisting}
+
+Before running the simulator, predict the measurement distribution.
+
+Then execute for 1000 shots and calculate:
+\[
+P(0)=\frac{N_0}{N},
+\qquad
+P(1)=\frac{N_1}{N}.
+\]
+
+Compare the results with theory.
+
+\subsection*{Exercise 25: Deterministic versus probabilistic circuits}
+Compare the following circuits.
+
+\textbf{Circuit A}
+\begin{lstlisting}
+qc.x(0)
+qc.measure(0, 0)
+\end{lstlisting}
+
+\textbf{Circuit B}
+\begin{lstlisting}
+qc.h(0)
+qc.measure(0, 0)
+\end{lstlisting}
+
+For each circuit:
+\begin{enumerate}
+    \item Predict the outcome.
+    \item Run 1000 shots.
+    \item Explain why one circuit is deterministic and the other probabilistic.
+\end{enumerate}
+
+\section{Circuit Mapping}
+
+\subsection*{Exercise 26: Quantum XOR circuit}
+Classically,
+\[
+S=A\oplus B.
+\]
+
+Design a reversible quantum circuit using three qubits:
+\[
+\ket{A,B,0}
+\]
+such that the third qubit becomes
+\[
+A\oplus B.
+\]
+
+Tasks:
+\begin{enumerate}
+    \item Determine the required gates.
+    \item Draw the circuit.
+    \item Implement it in Qiskit.
+    \item Test all four combinations of $A$ and $B$.
+\end{enumerate}
+
+\subsection*{Exercise 27: Quantum AND using Toffoli}
+Use three qubits:
+\[
+\ket{A,B,0}.
+\]
+
+Design the circuit such that the third qubit becomes
+\[
+A\land B.
+\]
+
+Test:
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$A$ & $B$ & Expected output \\
+\midrule
+0 & 0 & 0 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Use the Toffoli gate.
+
+\section{Quantum Half-Adder}
+
+\subsection*{Exercise 28: Manual half-adder design}
+A classical half-adder produces
+\[
+S=A\oplus B
+\]
+and
+\[
+C=A\land B.
+\]
+
+Using four qubits
+\[
+\ket{A,B,S,C},
+\]
+where initially
+\[
+S=C=0,
+\]
+determine which quantum gates are required to calculate the sum and carry.
+
+Do not use Qiskit initially. Draw the circuit manually.
+
+\subsection*{Exercise 29: Implement the half-adder}
+Implement the circuit from Exercise 28 using Qiskit.
+
+Use:
+\begin{lstlisting}
+QuantumCircuit(4, 4)
+\end{lstlisting}
+
+Your circuit must use:
+\begin{itemize}
+    \item two CNOT gates for the sum,
+    \item one Toffoli gate for the carry.
+\end{itemize}
+
+Test all four combinations:
+\[
+00,\quad 01,\quad 10,\quad 11.
+\]
+
+Create a table comparing theoretical and simulated results.
+
+\subsection*{Exercise 30: Verify the half-adder equation}
+For each input combination, verify:
+\[
+A+B=S+2C.
+\]
+
+Write Python code that automatically checks this equation for all four possible inputs. The program should print either \texttt{PASS} or \texttt{FAIL} for each case.
+
+\section{Code Completion Exercises}
+
+\subsection*{Exercise 31: Complete the Bell-state program}
+Complete the missing statements:
+\begin{lstlisting}
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector
+
+qc = QuantumCircuit(2)
+
+# Step 1
+_____________________
+
+# Step 2
+_____________________
+
+state = Statevector.from_instruction(qc)
+
+print(state)
+display(qc.draw("mpl"))
+\end{lstlisting}
+
+The required output state is
+\[
+\frac{\ket{00}+\ket{11}}{\sqrt{2}}.
+\]
+
+\subsection*{Exercise 32: Complete the measurement program}
+Complete the code so that a qubit is prepared in an equal superposition and measured 1000 times.
+
+\begin{lstlisting}
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+
+qc = QuantumCircuit(1, 1)
+
+_____________________
+_____________________
+
+simulator = _____________________
+
+result = simulator.run(
+    qc,
+    shots=_____________________
+).result()
+
+counts = _____________________
+
+print(counts)
+\end{lstlisting}
+
+\section{Predict Before Running}
+
+For each circuit below, do not run Qiskit first. Calculate the final state manually and then verify it.
+
+\subsection*{Exercise 33}
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+qc.x(0)
+qc.z(0)
+\end{lstlisting}
+
+\subsection*{Exercise 34}
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+qc.h(0)
+qc.x(0)
+\end{lstlisting}
+
+\subsection*{Exercise 35}
+\begin{lstlisting}
+qc = QuantumCircuit(1)
+qc.h(0)
+qc.z(0)
+qc.h(0)
+\end{lstlisting}
+
+\subsection*{Exercise 36}
+\begin{lstlisting}
+qc = QuantumCircuit(2)
+
+qc.x(0)
+qc.cx(0, 1)
+\end{lstlisting}
+
+Determine the final computational-basis state.
+
+\subsection*{Exercise 37}
+\begin{lstlisting}
+qc = QuantumCircuit(2)
+
+qc.h(0)
+qc.cx(0, 1)
+qc.x(1)
+\end{lstlisting}
+
+Find the final state algebraically and identify the corresponding Bell state.
+
+\section{Challenge Problems}
+
+\subsection*{Exercise 38: Create all four Bell states}
+Create Qiskit circuits for:
+\[
+\ket{\Phi^+}=
+\frac{\ket{00}+\ket{11}}{\sqrt{2}},
+\]
+\[
+\ket{\Phi^-}=
+\frac{\ket{00}-\ket{11}}{\sqrt{2}},
+\]
+\[
+\ket{\Psi^+}=
+\frac{\ket{01}+\ket{10}}{\sqrt{2}},
+\]
+and
+\[
+\ket{\Psi^-}=
+\frac{\ket{01}-\ket{10}}{\sqrt{2}}.
+\]
+
+For each:
+\begin{enumerate}
+    \item Draw the circuit.
+    \item Display the statevector.
+    \item Measure 1000 shots.
+    \item Compare the measurement results.
+    \item Explain why computational-basis measurement cannot distinguish the $+$ and $-$ relative phases directly.
+\end{enumerate}
+
+\subsection*{Exercise 39: Gate matrices using Qiskit}
+Use Qiskit to obtain the matrix representation of:
+\begin{itemize}
+    \item $X$,
+    \item $H$,
+    \item $Z$,
+    \item CNOT.
+\end{itemize}
+
+For example:
+\begin{lstlisting}
+from qiskit.quantum_info import Operator
+\end{lstlisting}
+
+Compare each Qiskit-generated matrix with the corresponding matrix derived manually.
+
+\subsection*{Exercise 40: Verify matrix multiplication against Qiskit}
+For the circuit
+\[
+\ket{0}
+\xrightarrow{H}
+\xrightarrow{Z}
+\xrightarrow{H},
+\]
+perform the calculation manually:
+\[
+HZH\ket{0}.
+\]
+
+Then implement the same circuit in Qiskit.
+
+Compare:
+\begin{enumerate}
+    \item manual matrix multiplication,
+    \item Qiskit statevector,
+    \item final measurement result.
+\end{enumerate}
+
+\end{document}
+
